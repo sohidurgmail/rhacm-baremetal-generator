@@ -1,0 +1,16 @@
+multicluster_engine_managed_cluster_baremetal:
+  cluster_name: mycluster8
+  base_domain: example.com
+  ocp_release_image: 4.20.0-x86_64
+  clusterwide_proxy: {}
+  trusted_ca_bundle: ''
+  api_vip: 192.168.80.10
+  ingress_vip: 192.168.80.11
+  ssh_authorized_key: ''          # add your SSH public key
+  install_config_overrides: {}    # can be a map; will be JSON-encoded into annotation
+  location: myregion
+  cpu_architecture: x86_64
+  user_managed_networking: false
+  network_type: dhcp
+  network_config_fileglob: ''
+

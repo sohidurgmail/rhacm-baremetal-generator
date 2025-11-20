@@ -1,0 +1,21 @@
+---
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: {{ rhcos_name }}
+  namespace: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}-infraenv
+  labels:
+    infraenvs.agent-install.openshift.io: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+    cluster-name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+    node-role.kubernetes.io/worker: ""
+spec:
+  online: true
+  automatedCleaningMode: disabled
+  bootMACAddress: '{{ ilo_mac }}'
+  bmc:
+    address: '{{ ilo_ip }}'
+    credentialsName: bmc-{{ rhcos_name | regex_replace(':', '-',) }}
+    disableCertificateVerification: true
+  bootMode: 'UEFI'
+  rootDeviceHints: {}
+

@@ -1,0 +1,23 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  namespace: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+spec:
+  baseDomain: {{ multicluster_engine_managed_cluster_baremetal.base_domain }}
+  clusterName: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  installAttemptsLimit: 1
+  pullSecretRef:
+    name: pullsecret-{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  platform:
+    agentBareMetal:
+      agentSelector:
+        matchLabels:
+          cluster-name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  provisioning:
+    installStrategy:
+      agent:
+        agentSelector:
+          matchLabels:
+            cluster-name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+

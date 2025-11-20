@@ -1,0 +1,35 @@
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  namespace: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}-infraenv
+  labels:
+    agentclusterinstalls.extensions.hive.openshift.io/location: '{{ multicluster_engine_managed_cluster_baremetal.location }}'
+    networkType: {{ multicluster_engine_managed_cluster_baremetal.network_type }}
+spec:
+  clusterRef:
+    name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+    namespace: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+{% if multicluster_engine_managed_cluster_baremetal.trusted_ca_bundle %}
+  additionalTrustBundle: |
+    {{ multicluster_engine_managed_cluster_baremetal.trusted_ca_bundle | indent(4) }}
+{% endif %}
+  agentLabels:
+    agentclusterinstalls.extensions.hive.openshift.io/location: '{{ multicluster_engine_managed_cluster_baremetal.location }}'
+    cluster-name: '{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}'
+  pullSecretRef:
+    name: pullsecret-{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  sshAuthorizedKey: '{{ multicluster_engine_managed_cluster_baremetal.ssh_authorized_key }}'
+  nmStateConfigLabelSelector:
+    matchLabels:
+      infraenvs.agent-install.openshift.io: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+{% if multicluster_engine_managed_cluster_baremetal.clusterwide_proxy %}
+  proxy:
+    httpProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.http_proxy }}
+    httpsProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.https_proxy }}
+    noProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.no_proxy }}
+{% else %}
+  proxy: {}
+{% endif %}
+  cpuArchitecture: {{ multicluster_engine_managed_cluster_baremetal.cpu_architecture }}
+

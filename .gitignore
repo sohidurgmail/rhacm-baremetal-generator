@@ -1,0 +1,12 @@
+# Generated manifests
+out/
+
+# Ansible noise
+*.retry
+
+# VS Code config
+.vscode/
+
+# Python / temp
+__pycache__/
+*.log

@@ -1,0 +1,44 @@
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  namespace: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  labels:
+    cluster-name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+{% if multicluster_engine_managed_cluster_baremetal.install_config_overrides is defined and multicluster_engine_managed_cluster_baremetal.install_config_overrides %}
+  annotations:
+    agent-install.openshift.io/install-config-overrides: '{{ multicluster_engine_managed_cluster_baremetal.install_config_overrides | to_json }}'
+{% endif %}
+spec:
+{% if not multicluster_engine_managed_cluster_baremetal.user_managed_networking %}
+  apiVIP: {{ multicluster_engine_managed_cluster_baremetal.api_vip }}
+  ingressVIP: {{ multicluster_engine_managed_cluster_baremetal.ingress_vip }}
+{% endif %}
+  clusterDeploymentRef:
+    name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  imageSetRef:
+    name: img{{ multicluster_engine_managed_cluster_baremetal.ocp_release_image | regex_replace('_', '-',) }}-appsub
+  provisionRequirements:
+    controlPlaneAgents: {{ multicluster_engine_managed_cluster_control_plane_agents | int }}
+    workerAgents: {{ multicluster_engine_managed_cluster_worker_agents | int }}
+  controlPlane:
+    hyperthreading: Enabled
+    name: master
+  compute:
+  - hyperthreading: Enabled
+    name: worker
+  networking:
+    clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+    serviceNetwork:
+    - 172.30.0.0/16
+    userManagedNetworking: {{ multicluster_engine_managed_cluster_baremetal.user_managed_networking }}
+{% if multicluster_engine_managed_cluster_baremetal.clusterwide_proxy %}
+  proxy:
+    httpProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.http_proxy }}
+    httpsProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.https_proxy }}
+    noProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.no_proxy }}
+{% endif %}
+  sshPublicKey: '{{ multicluster_engine_managed_cluster_baremetal.ssh_authorized_key }}'
+
