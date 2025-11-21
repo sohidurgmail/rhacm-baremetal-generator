@@ -1,0 +1,83 @@
+---
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: {{ rhcos_name }}
+  namespace: {{ infraenv_namespace }}
+  labels:
+    infraenvs.agent-install.openshift.io: {{ multicluster_engine_managed_cluster.cluster_name }}
+spec:
+  interfaces:
+    - name: ens1f0np0
+      macAddress: '{{ bmc57416_nic0_mac }}'
+    - name: ens1f1np1
+      macAddress: '{{ bmc57416_nic1_mac }}'
+    - name: ens2f0np1
+      macAddress: '{{ sfc_x2522_nic0_mac }}'
+    - name: ens2f1np1
+      macAddress: '{{ sfc_x2522_nic1_mac }}'
+  config:
+    dns-resolver:
+      config:
+        server:
+{% for s in multicluster_engine_managed_cluster.nmstate_dns_servers %}
+          - {{ s }}
+{% endfor %}
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: {{ multicluster_engine_managed_cluster.nmstate_gateway }}
+          next-hop-interface: bond0
+          table-id: 254
+    interfaces:
+      - name: ens1f0np0
+        type: ethernet
+        state: up
+        mac-address: '{{ bmc57416_nic0_mac }}'
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+      - name: ens1f1np1
+        type: ethernet
+        state: up
+        mac-address: '{{ bmc57416_nic1_mac }}'
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+      - name: ens2f0np1
+        type: ethernet
+        state: down
+        mac-address: '{{ sfc_x2522_nic0_mac }}'
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+      - name: ens2f1np1
+        type: ethernet
+        state: down
+        mac-address: '{{ sfc_x2522_nic1_mac }}'
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+      - name: bond0
+        type: bond
+        state: up
+        link-aggregation:
+          mode: active-backup
+          options:
+            miimon: '100'
+            primary: ens1f0np0
+          port:
+            - ens1f0np0
+            - ens1f1np1
+        ipv4:
+          enabled: true
+          address:
+            - ip: {{ mgmt_ip }}
+              prefix: {{ multicluster_engine_managed_cluster.nmstate_prefix }}
+          dhcp: false
+        ipv6:
+          enabled: false

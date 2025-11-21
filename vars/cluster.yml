@@ -86,3 +86,16 @@ multicluster_engine_managed_cluster_baremetal:
   #       replicas: 3
   #
   install_config_overrides: {}
+
+  # ---------------------------
+  # NMState settings (per-cluster)
+  # ---------------------------
+  nmstate_dns_servers:
+    - 10.210.20.24
+    - 10.210.20.23
+
+  # Default gateway for the management network (where bond0 lives)
+  nmstate_gateway: 10.210.142.1
+
+  # Prefix length for Management IP (e.g. /24)
+  nmstate_prefix: 24

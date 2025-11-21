@@ -112,6 +112,27 @@
         # First 3 nodes are masters, everything else is worker
         role: "{{ 'master' if ansible_loop.index0 < 3 else 'worker' }}"
 
+    - name: Generate NMStateConfig YAML for all nodes (split by index)
+      ansible.builtin.template:
+        src: templates/nmstateconfig.yaml.j2
+        dest: >-
+          {{
+            (ansible_loop.index0 < 6)
+            | ternary(output_dir, remaining_output_dir)
+          }}/nmstateconfig-{{ item['Red Hat Core OS'] }}.yaml
+        mode: '0664'
+      loop: "{{ nodes }}"
+      loop_control:
+        label: "{{ item['Red Hat Core OS'] }}"
+        extended: true
+      vars:
+        rhcos_name: "{{ item['Red Hat Core OS'] }}"
+        mgmt_ip: "{{ item['Management IP'] }}"
+        bmc57416_nic0_mac: "{{ item['BMC57416 NIC0'] }}"
+        bmc57416_nic1_mac: "{{ item['BMC57416 NIC1'] }}"
+        sfc_x2522_nic0_mac: "{{ item['SFC X2522 NIC0'] }}"
+        sfc_x2522_nic1_mac: "{{ item['SFC X2522 NIC1'] }}"
+
     - name: Generate BMC Secret YAML (single shared secret)
       ansible.builtin.template:
         src: templates/bmc-secret.yaml.j2
