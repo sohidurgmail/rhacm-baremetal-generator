@@ -1,4 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: cl-dc3-qdt-lan-01-infraenv
