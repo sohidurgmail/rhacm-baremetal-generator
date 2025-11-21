@@ -35,21 +35,21 @@
       register: nodes
 
     # --------------------
-    # Cluster + InfraEnv YAMLs
+    # Cluster + InfraEnv YAMLs (single simple loop)
     # --------------------
     - name: Render cluster and infraenv templates
       template:
-        src: "templates/{{ item.src }}"
-        dest: "{{ output_dir }}/{{ item.dest }}"
+        src: "templates/{{ item }}.yaml.j2"
+        dest: "{{ output_dir }}/{{ item }}.yaml"
       loop:
-        - { src: "cluster-namespace.yaml.j2",           dest: "cluster-namespace.yaml" }
-        - { src: "cluster-deployment.yaml.j2",          dest: "cluster-deployment.yaml" }
-        - { src: "managedcluster.yaml.j2",              dest: "managedcluster.yaml" }
-        - { src: "klusterletaddonconfig.yaml.j2",       dest: "klusterletaddonconfig.yaml" }
-        - { src: "cluster-agentclusterinstall.yaml.j2", dest: "cluster-agentclusterinstall.yaml" }
-        - { src: "cluster-infraenv-ns.yaml.j2",         dest: "cluster-infraenv-ns.yaml" }
-        - { src: "cluster-infraenv.yaml.j2",            dest: "cluster-infraenv.yaml" }
-        - { src: "pullsecret-cluster-secret.yaml.j2",   dest: "pullsecret-cluster-secret.yaml" }
+        - cluster-namespace
+        - cluster-deployment
+        - managedcluster
+        - klusterletaddonconfig
+        - cluster-agentclusterinstall
+        - cluster-infraenv-ns
+        - cluster-infraenv
+        - pullsecret-cluster-secret
 
     # --------------------
     # Node / hardware level
