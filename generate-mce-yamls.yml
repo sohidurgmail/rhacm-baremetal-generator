@@ -50,34 +50,32 @@
         state: directory
         mode: '0775'
 
-    - name: Read nodes from CSV (raw, with explicit fieldnames)
-      community.general.read_csv:
-        path: "{{ csv_path }}"
-        delimiter: ','
-        skipinitialspace: true
-        fieldnames:
-          - Worker nodes
-          - Red Hat Core OS
-          - Role
-          - iLO IP
-          - Management IP
-          - vMotion IP
-          - ILO MAC
-          - BMC57416 NIC0
-          - BMC57416 NIC1
-          - SFC X2522 NIC0
-          - SFC X2522 NIC1
-      register: nodes_raw
+    - name: Slurp raw CSV file (may contain junk lines and extra columns)
+      ansible.builtin.slurp:
+        src: "{{ csv_path }}"
+      register: csv_raw
 
-    - name: Filter valid node rows (drop junk/header rows)
+    - name: Extract CSV starting from the real header row
+      ansible.builtin.set_fact:
+        csv_clean: >-
+          {{
+            (csv_raw.content | b64decode)
+            | regex_replace('(?s)^.*?(Worker nodes,Red Hat Core OS.*)$', '\1')
+          }}
+
+    - name: Parse cleaned CSV into list of dicts (header-driven)
+      ansible.builtin.set_fact:
+        nodes_raw: "{{ csv_clean | community.general.from_csv }}"
+
+    - name: Filter valid node rows (drop junk/blank/notes)
       ansible.builtin.set_fact:
         nodes: >-
           {{
-            nodes_raw.list
-            | selectattr('Management IP', 'match', '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$')
+            nodes_raw
+            | selectattr('Red Hat Core OS', 'defined')
+            | selectattr('Red Hat Core OS', 'ne', '')
             | list
           }}
-
   tasks:
     # --------------------
     # Cluster-level YAMLs (no per-node data)

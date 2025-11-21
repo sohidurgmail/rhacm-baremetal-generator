@@ -1,5 +1,6 @@
 # Generated manifests
-out/
+cl-dc3-qdt-lan-01-remaining-nodes/
+cl-dc3-qdt-lan-01/
 
 # Ansible noise
 *.retry
