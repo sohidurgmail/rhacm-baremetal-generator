@@ -1,15 +1,15 @@
 apiVersion: extensions.hive.openshift.io/v1beta1
 kind: AgentClusterInstall
 metadata:
-  name: cl-dc3-qdt-01
-  namespace: cl-dc3-qdt-01
+  name: cl-dc3-qdt-lan-01
+  namespace: cl-dc3-qdt-lan-01
   labels:
-    cluster-name: cl-dc3-qdt-01
+    cluster-name: cl-dc3-qdt-lan-01
 spec:
   apiVIP: 192.168.80.10
   ingressVIP: 192.168.80.11
   clusterDeploymentRef:
-    name: cl-dc3-qdt-01
+    name: cl-dc3-qdt-lan-01
   imageSetRef:
     name: img4.20.0-x86-64-appsub
   provisionRequirements:

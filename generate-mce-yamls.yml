@@ -9,30 +9,30 @@
     - vars/cluster.yml
 
   vars:
-    # CSV file is named after the cluster, e.g. mycluster8.csv
+    # CSV file is named after the cluster, e.g. cl-dc3-qdt-01.csv
     csv_path: "{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}.csv"
 
-    # Primary output directory (cluster dir), e.g. mycluster8/
+    # Primary output directory (cluster dir), e.g. cl-dc3-qdt-01/
     output_dir: "{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}"
 
-    # Directory for remaining nodes, e.g. mycluster8-remaining-nodes/
+    # Directory for remaining nodes, e.g. cl-dc3-qdt-01-remaining-nodes/
     remaining_output_dir: "{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}-remaining-nodes"
 
     # Global BMC credentials (same for all nodes in your case)
     bmc_username: root
     bmc_password: changeme
 
-    # AgentClusterInstall sizing
+    # AgentClusterInstall sizing (used in cluster-agentclusterinstall.yaml.j2)
     multicluster_engine_managed_cluster_control_plane_agents: 3
     multicluster_engine_managed_cluster_worker_agents: 3
 
-    # Global pull secret (Docker config JSON)
+    # Global pull secret (Docker config JSON) used in pullsecret-cluster-secret.yaml.j2
     redhat_cloud_pull_secret: 'REPLACE_ME'
 
   pre_tasks:
     - name: Derive cluster variables
       ansible.builtin.set_fact:
-        # Generic alias for templates
+        # Generic alias for templates (cluster-level values)
         multicluster_engine_managed_cluster: "{{ multicluster_engine_managed_cluster_baremetal }}"
         # Convenience variables
         cluster_namespace: "{{ multicluster_engine_managed_cluster_baremetal.cluster_name }}"
@@ -67,31 +67,33 @@
 
   tasks:
     # --------------------
-    # Cluster + InfraEnv YAMLs
+    # Cluster-level YAMLs (no per-node data)
     # --------------------
-    - name: Render cluster and infraenv templates
+    - name: Render cluster-level templates
       ansible.builtin.template:
         src: "templates/{{ item }}.yaml.j2"
         dest: "{{ output_dir }}/{{ item }}.yaml"
         mode: '0664'
       loop:
-        - cluster-namespace
-        - cluster-deployment
-        - managedcluster
-        - klusterletaddonconfig
-        - cluster-agentclusterinstall
         - cluster-infraenv-ns
         - cluster-infraenv
+        - cluster-agentclusterinstall
         - pullsecret-cluster-secret
         - install-config
 
+    - name: Generate BMC Secret YAML (single shared secret)
+      ansible.builtin.template:
+        src: templates/bmc-secret.yaml.j2
+        dest: "{{ output_dir }}/bmc-secret.yaml"
+        mode: '0664'
+
     # --------------------
-    # Node / hardware level
+    # Node / hardware-level YAMLs
+    # Rule (index-based, no Role column in CSV):
+    #   index 0,1,2 -> masters in primary dir
+    #   index 3,4,5 -> workers in primary dir
+    #   index >= 6  -> workers in remaining-nodes dir
     # --------------------
-    # Rule:
-    # - index 0,1,2  -> masters in primary dir
-    # - index 3,4,5  -> workers in primary dir
-    # - index >= 6   -> workers in remaining-nodes dir
     - name: Generate BareMetalHost YAML for all nodes (split by index)
       ansible.builtin.template:
         src: templates/baremetalhost.yaml.j2
@@ -109,7 +111,7 @@
         rhcos_name: "{{ item['Red Hat Core OS'] }}"
         ilo_ip: "{{ item['iLO IP'] }}"
         ilo_mac: "{{ item['ILO MAC'] }}"
-        # First 3 nodes are masters, everything else is worker
+        # First 3 nodes are masters, everything else is worker (for labels in BMH)
         role: "{{ 'master' if ansible_loop.index0 < 3 else 'worker' }}"
 
     - name: Generate NMStateConfig YAML for all nodes (split by index)
@@ -132,9 +134,3 @@
         bmc57416_nic1_mac: "{{ item['BMC57416 NIC1'] }}"
         sfc_x2522_nic0_mac: "{{ item['SFC X2522 NIC0'] }}"
         sfc_x2522_nic1_mac: "{{ item['SFC X2522 NIC1'] }}"
-
-    - name: Generate BMC Secret YAML (single shared secret)
-      ansible.builtin.template:
-        src: templates/bmc-secret.yaml.j2
-        dest: "{{ output_dir }}/bmc-secret.yaml"
-        mode: '0664'

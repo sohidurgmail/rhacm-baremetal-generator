@@ -2,12 +2,12 @@
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
 metadata:
-  name: workernode3
-  namespace: cl-dc3-qdt-01-infraenv
+  name: workernode7
+  namespace: cl-dc3-qdt-lan-01-infraenv
   labels:
-    infraenvs.agent-install.openshift.io: cl-dc3-qdt-01
-    cluster-name: cl-dc3-qdt-01
-    node-role.kubernetes.io/master: ""
+    infraenvs.agent-install.openshift.io: cl-dc3-qdt-lan-01
+    cluster-name: cl-dc3-qdt-lan-01
+    node-role.kubernetes.io/worker: ""
 spec:
   online: true
   bootMACAddress: '00:1C:2B:3C:4D:5E'

@@ -11,9 +11,8 @@ multicluster_engine_managed_cluster_baremetal:
   # ---------------------------
   # Basic identity
   # ---------------------------
-  cluster_name: cl-dc3-qdt-01          # <--- also drives CSV name: mycluster8.csv
-  base_domain: example.com           # e.g. sandbox.abc.com
-  ocp_release_image: 4.20.0-x86_64   # Must match your mirror/imageSet
+  cluster_name: cl-dc3-qdt-lan-01
+  ocp_release_image: 4.20.0-x86_64
 
   # ---------------------------
   # VIPs (for non-UMN installs)

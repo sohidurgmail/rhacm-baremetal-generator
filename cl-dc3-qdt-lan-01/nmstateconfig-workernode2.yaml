@@ -2,10 +2,10 @@
 apiVersion: agent-install.openshift.io/v1beta1
 kind: NMStateConfig
 metadata:
-  name: workernode8
-  namespace: cl-dc3-qdt-01-infraenv
+  name: workernode2
+  namespace: cl-dc3-qdt-lan-01-infraenv
   labels:
-    infraenvs.agent-install.openshift.io: cl-dc3-qdt-01
+    infraenvs.agent-install.openshift.io: cl-dc3-qdt-lan-01
 spec:
   interfaces:
     - name: ens1f0np0
@@ -47,7 +47,7 @@ spec:
           enabled: false
       - name: ens2f0np1
         type: ethernet
-        state: up
+        state: down
         mac-address: '00:1B:2B:3C:4D:8E'
         ipv4:
           enabled: false
@@ -55,7 +55,7 @@ spec:
           enabled: false
       - name: ens2f1np1
         type: ethernet
-        state: up
+        state: down
         mac-address: '00:1B:2B:3C:4D:9E'
         ipv4:
           enabled: false
