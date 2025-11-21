@@ -29,10 +29,10 @@ spec:
     name: worker
   networking:
     clusterNetwork:
-    - cidr: 10.128.0.0/14
-      hostPrefix: 23
+    - cidr: {{ multicluster_engine_managed_cluster_baremetal.cluster_network_cidr }}
+      hostPrefix: {{ multicluster_engine_managed_cluster_baremetal.cluster_network_host_prefix }}
     serviceNetwork:
-    - 172.30.0.0/16
+    - {{ multicluster_engine_managed_cluster_baremetal.service_network_cidr }}
     userManagedNetworking: {{ multicluster_engine_managed_cluster_baremetal.user_managed_networking }}
 {% if multicluster_engine_managed_cluster_baremetal.clusterwide_proxy %}
   proxy:

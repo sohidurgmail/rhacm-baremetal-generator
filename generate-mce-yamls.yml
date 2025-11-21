@@ -2,16 +2,17 @@
   gather_facts: false
 
   collections:
-    - community.general   # for read_csv
+    - community.general   # read_csv comes from here
 
   vars_files:
     - vars/cluster.yml
 
   vars:
+    # Input data
     csv_path: nodes.csv
     output_dir: out
 
-    # BMC credentials (same for all nodes in your case)
+    # Global BMC credentials (same for all nodes in your case)
     bmc_username: root
     bmc_password: changeme
 
@@ -34,57 +35,25 @@
       register: nodes
 
     # --------------------
-    # Cluster-level YAMLs
+    # Cluster + InfraEnv YAMLs
     # --------------------
-
-    - name: Generate cluster namespace YAML
+    - name: Render cluster and infraenv templates
       template:
-        src: templates/cluster-namespace.yaml.j2
-        dest: "{{ output_dir }}/cluster-namespace.yaml"
-
-    - name: Generate ClusterDeployment YAML
-      template:
-        src: templates/cluster-deployment.yaml.j2
-        dest: "{{ output_dir }}/cluster-deployment.yaml"
-
-    - name: Generate ManagedCluster YAML
-      template:
-        src: templates/managedcluster.yaml.j2
-        dest: "{{ output_dir }}/managedcluster.yaml"
-
-    - name: Generate KlusterletAddonConfig YAML
-      template:
-        src: templates/klusterletaddonconfig.yaml.j2
-        dest: "{{ output_dir }}/klusterletaddonconfig.yaml"
-
-    - name: Generate AgentClusterInstall YAML
-      template:
-        src: templates/cluster-agentclusterinstall.yaml.j2
-        dest: "{{ output_dir }}/cluster-agentclusterinstall.yaml"
-
-    # --------------------
-    # InfraEnv side
-    # --------------------
-
-    - name: Generate infraenv namespace YAML
-      template:
-        src: templates/cluster-infraenv-ns.yaml.j2
-        dest: "{{ output_dir }}/cluster-infraenv-ns.yaml"
-
-    - name: Generate InfraEnv YAML
-      template:
-        src: templates/cluster-infraenv.yaml.j2
-        dest: "{{ output_dir }}/cluster-infraenv.yaml"
-
-    - name: Generate pull secret YAML (both namespaces)
-      template:
-        src: templates/pullsecret-cluster-secret.yaml.j2
-        dest: "{{ output_dir }}/pullsecret-cluster-secret.yaml"
+        src: "templates/{{ item.src }}"
+        dest: "{{ output_dir }}/{{ item.dest }}"
+      loop:
+        - { src: "cluster-namespace.yaml.j2",           dest: "cluster-namespace.yaml" }
+        - { src: "cluster-deployment.yaml.j2",          dest: "cluster-deployment.yaml" }
+        - { src: "managedcluster.yaml.j2",              dest: "managedcluster.yaml" }
+        - { src: "klusterletaddonconfig.yaml.j2",       dest: "klusterletaddonconfig.yaml" }
+        - { src: "cluster-agentclusterinstall.yaml.j2", dest: "cluster-agentclusterinstall.yaml" }
+        - { src: "cluster-infraenv-ns.yaml.j2",         dest: "cluster-infraenv-ns.yaml" }
+        - { src: "cluster-infraenv.yaml.j2",            dest: "cluster-infraenv.yaml" }
+        - { src: "pullsecret-cluster-secret.yaml.j2",   dest: "pullsecret-cluster-secret.yaml" }
 
     # --------------------
     # Node / hardware level
     # --------------------
-
     - name: Generate BareMetalHost YAML per node
       template:
         src: templates/baremetalhost.yaml.j2
@@ -96,11 +65,10 @@
         rhcos_name: "{{ item['Red Hat Core OS'] }}"
         ilo_ip: "{{ item['iLO IP'] }}"
         ilo_mac: "{{ item['ILO MAC'] }}"
+        # Role column in CSV; defaults to worker if missing
+        role: "{{ (item['Role'] | default('worker')) | lower }}"
 
     - name: Generate BMC Secret YAML for all nodes (multi-doc)
       template:
         src: templates/bmc-secret.yaml.j2
         dest: "{{ output_dir }}/bmc-secret.yaml"
-      vars:
-        nodes: "{{ nodes }}"
-

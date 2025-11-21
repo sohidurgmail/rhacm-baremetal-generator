@@ -7,7 +7,11 @@ metadata:
   labels:
     infraenvs.agent-install.openshift.io: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
     cluster-name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+{% if role == 'master' %}
+    node-role.kubernetes.io/master: ""
+{% elif role == 'worker' %}
     node-role.kubernetes.io/worker: ""
+{% endif %}
 spec:
   online: true
   automatedCleaningMode: disabled
@@ -18,4 +22,3 @@ spec:
     disableCertificateVerification: true
   bootMode: 'UEFI'
   rootDeviceHints: {}
-
