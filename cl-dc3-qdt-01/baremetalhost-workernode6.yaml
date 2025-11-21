@@ -1,0 +1,21 @@
+---
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: workernode6
+  namespace: cl-dc3-qdt-01-infraenv
+  labels:
+    infraenvs.agent-install.openshift.io: cl-dc3-qdt-01
+    cluster-name: cl-dc3-qdt-01
+    node-role.kubernetes.io/worker: ""
+spec:
+  online: true
+  bootMACAddress: '00:1B:2B:3C:4D:5E'
+  bmc:
+    # Build the Redfish virtual media URL from the iLO IP
+    address: 'redfish-virtualmedia://10.210.33.132/redfish/v1/Systems/1'
+    # Single shared secret for all nodes
+    credentialsName: bmc-secret
+    disableCertificateVerification: true
+  rootDeviceHints:
+    deviceName: "/dev/sda"

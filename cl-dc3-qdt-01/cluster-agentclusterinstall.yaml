@@ -1,0 +1,31 @@
+apiVersion: extensions.hive.openshift.io/v1beta1
+kind: AgentClusterInstall
+metadata:
+  name: cl-dc3-qdt-01
+  namespace: cl-dc3-qdt-01
+  labels:
+    cluster-name: cl-dc3-qdt-01
+spec:
+  apiVIP: 192.168.80.10
+  ingressVIP: 192.168.80.11
+  clusterDeploymentRef:
+    name: cl-dc3-qdt-01
+  imageSetRef:
+    name: img4.20.0-x86-64-appsub
+  provisionRequirements:
+    controlPlaneAgents: 3
+    workerAgents: 3
+  controlPlane:
+    hyperthreading: Enabled
+    name: master
+  compute:
+  - hyperthreading: Enabled
+    name: worker
+  networking:
+    clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+    serviceNetwork:
+    - 172.30.0.0/16
+    userManagedNetworking: False
+  sshPublicKey: 'ssh-rsa AAAA... your-key-here'

@@ -1,7 +1,7 @@
 apiVersion: cluster.open-cluster-management.io/v1
 kind: ManagedCluster
 metadata:
-  name: {{ multicluster_engine_managed_cluster.cluster_name }}
+  name: cl-dc3-qdt-01
   labels:
     cloud: BareMetal
     vendor: OpenShift

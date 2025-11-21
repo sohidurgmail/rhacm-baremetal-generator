@@ -1,4 +1,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ infraenv_namespace }}
+  name: cl-dc3-qdt-01-infraenv

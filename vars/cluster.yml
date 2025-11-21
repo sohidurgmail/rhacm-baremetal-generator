@@ -1,20 +1,88 @@
+# vars/cluster.yml
+#
+# Source of truth for cluster-level settings used by:
+# - ClusterDeployment
+# - AgentClusterInstall
+# - InfraEnv
+# - Namespaces
+# - install-config overrides (optional)
+
 multicluster_engine_managed_cluster_baremetal:
-  cluster_name: mycluster8
-  base_domain: example.com
-  ocp_release_image: 4.20.0-x86_64
-  clusterwide_proxy: {}
-  trusted_ca_bundle: ''
+  # ---------------------------
+  # Basic identity
+  # ---------------------------
+  cluster_name: cl-dc3-qdt-01          # <--- also drives CSV name: mycluster8.csv
+  base_domain: example.com           # e.g. sandbox.abc.com
+  ocp_release_image: 4.20.0-x86_64   # Must match your mirror/imageSet
+
+  # ---------------------------
+  # VIPs (for non-UMN installs)
+  # ---------------------------
   api_vip: 192.168.80.10
   ingress_vip: 192.168.80.11
-  ssh_authorized_key: ''
-  install_config_overrides: {}
-  location: myregion
-  cpu_architecture: x86_64
-  user_managed_networking: false
-  network_type: dhcp
-  network_config_fileglob: ''
 
-  # NEW – make these match your project’s networks
+  # ---------------------------
+  # SSH key for InfraEnv / cluster
+  # ---------------------------
+  # Put your real SSH public key here
+  ssh_authorized_key: "ssh-rsa AAAA... your-key-here"
+
+  # ---------------------------
+  # Labels / meta
+  # ---------------------------
+  location: myregion                 # Used as a label on InfraEnv & agents
+  cpu_architecture: x86_64
+
+  # ---------------------------
+  # Networking
+  # ---------------------------
+  # If false, we use apiVIP/ingressVIP and cluster-managed networking.
+  # If true, you are responsible for networking (e.g. static configs, etc.).
+  user_managed_networking: false
+
+  # Informational only for now (passed as labels/fields):
+  # "static" or "dhcp"
+  network_type: dhcp
+
+  # Cluster & service networks (these are used in AgentClusterInstall)
   cluster_network_cidr: 10.128.0.0/14
   cluster_network_host_prefix: 23
   service_network_cidr: 172.30.0.0/16
+
+  # Optionally, a glob for network config files (not actively used yet in templates)
+  network_config_fileglob: ""
+
+  # ---------------------------
+  # Proxy & CA (optional)
+  # ---------------------------
+  # Either {} for no proxy, or a dict with http/https/no_proxy
+  #
+  # Example:
+  # clusterwide_proxy:
+  #   http_proxy: http://user:pass@proxy.example.com:3128
+  #   https_proxy: http://user:pass@proxy.example.com:3128
+  #   no_proxy: ".example.com,10.0.0.0/8"
+  #
+  clusterwide_proxy: {}
+
+  # Trusted CA bundle as a multi-line string if you use a custom proxy/registry CA.
+  # Leave empty '' if not needed.
+  trusted_ca_bundle: ""
+
+  # ---------------------------
+  # install-config overrides (advanced / optional)
+  # ---------------------------
+  # This is merged into the internal install-config via AgentClusterInstall
+  # and also rendered to install-config.yaml for your inspection.
+  #
+  # Example:
+  #
+  # install_config_overrides:
+  #   controlPlane:
+  #     hyperthreading: Disabled
+  #   compute:
+  #     - name: worker
+  #       hyperthreading: Enabled
+  #       replicas: 3
+  #
+  install_config_overrides: {}

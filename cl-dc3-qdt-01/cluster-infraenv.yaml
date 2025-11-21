@@ -1,0 +1,23 @@
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: cl-dc3-qdt-01
+  namespace: cl-dc3-qdt-01-infraenv
+  labels:
+    agentclusterinstalls.extensions.hive.openshift.io/location: 'myregion'
+    networkType: dhcp
+spec:
+  clusterRef:
+    name: cl-dc3-qdt-01
+    namespace: cl-dc3-qdt-01
+  agentLabels:
+    agentclusterinstalls.extensions.hive.openshift.io/location: 'myregion'
+    cluster-name: 'cl-dc3-qdt-01'
+  pullSecretRef:
+    name: pullsecret-cl-dc3-qdt-01
+  sshAuthorizedKey: 'ssh-rsa AAAA... your-key-here'
+  nmStateConfigLabelSelector:
+    matchLabels:
+      infraenvs.agent-install.openshift.io: cl-dc3-qdt-01
+  proxy: {}
+  cpuArchitecture: x86_64

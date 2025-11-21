@@ -1,11 +1,11 @@
 apiVersion: agent.open-cluster-management.io/v1
 kind: KlusterletAddonConfig
 metadata:
-  name: {{ multicluster_engine_managed_cluster.cluster_name }}
-  namespace: {{ cluster_namespace }}
+  name: cl-dc3-qdt-01
+  namespace: cl-dc3-qdt-01
 spec:
-  clusterName: {{ multicluster_engine_managed_cluster.cluster_name }}
-  clusterNamespace: {{ cluster_namespace }}
+  clusterName: cl-dc3-qdt-01
+  clusterNamespace: cl-dc3-qdt-01
   clusterLabels:
     cloud: BareMetal
     vendor: OpenShift

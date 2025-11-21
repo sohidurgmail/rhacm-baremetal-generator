@@ -1,0 +1,22 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: cl-dc3-qdt-01
+  namespace: cl-dc3-qdt-01
+spec:
+  baseDomain: example.com
+  clusterName: cl-dc3-qdt-01
+  installAttemptsLimit: 1
+  pullSecretRef:
+    name: pullsecret-cl-dc3-qdt-01
+  platform:
+    agentBareMetal:
+      agentSelector:
+        matchLabels:
+          cluster-name: cl-dc3-qdt-01
+  provisioning:
+    installStrategy:
+      agent:
+        agentSelector:
+          matchLabels:
+            cluster-name: cl-dc3-qdt-01

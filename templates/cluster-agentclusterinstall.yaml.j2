@@ -1,23 +1,23 @@
 apiVersion: extensions.hive.openshift.io/v1beta1
 kind: AgentClusterInstall
 metadata:
-  name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
-  namespace: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+  name: {{ multicluster_engine_managed_cluster.cluster_name }}
+  namespace: {{ cluster_namespace }}
   labels:
-    cluster-name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
-{% if multicluster_engine_managed_cluster_baremetal.install_config_overrides is defined and multicluster_engine_managed_cluster_baremetal.install_config_overrides %}
+    cluster-name: {{ multicluster_engine_managed_cluster.cluster_name }}
+{% if multicluster_engine_managed_cluster.install_config_overrides is defined and multicluster_engine_managed_cluster.install_config_overrides %}
   annotations:
-    agent-install.openshift.io/install-config-overrides: '{{ multicluster_engine_managed_cluster_baremetal.install_config_overrides | to_json }}'
+    agent-install.openshift.io/install-config-overrides: '{{ multicluster_engine_managed_cluster.install_config_overrides | to_json }}'
 {% endif %}
 spec:
-{% if not multicluster_engine_managed_cluster_baremetal.user_managed_networking %}
-  apiVIP: {{ multicluster_engine_managed_cluster_baremetal.api_vip }}
-  ingressVIP: {{ multicluster_engine_managed_cluster_baremetal.ingress_vip }}
+{% if not multicluster_engine_managed_cluster.user_managed_networking %}
+  apiVIP: {{ multicluster_engine_managed_cluster.api_vip }}
+  ingressVIP: {{ multicluster_engine_managed_cluster.ingress_vip }}
 {% endif %}
   clusterDeploymentRef:
-    name: {{ multicluster_engine_managed_cluster_baremetal.cluster_name }}
+    name: {{ multicluster_engine_managed_cluster.cluster_name }}
   imageSetRef:
-    name: img{{ multicluster_engine_managed_cluster_baremetal.ocp_release_image | regex_replace('_', '-',) }}-appsub
+    name: img{{ multicluster_engine_managed_cluster.ocp_release_image | regex_replace('_', '-',) }}-appsub
   provisionRequirements:
     controlPlaneAgents: {{ multicluster_engine_managed_cluster_control_plane_agents | int }}
     workerAgents: {{ multicluster_engine_managed_cluster_worker_agents | int }}
@@ -29,16 +29,15 @@ spec:
     name: worker
   networking:
     clusterNetwork:
-    - cidr: {{ multicluster_engine_managed_cluster_baremetal.cluster_network_cidr }}
-      hostPrefix: {{ multicluster_engine_managed_cluster_baremetal.cluster_network_host_prefix }}
+    - cidr: {{ multicluster_engine_managed_cluster.cluster_network_cidr }}
+      hostPrefix: {{ multicluster_engine_managed_cluster.cluster_network_host_prefix }}
     serviceNetwork:
-    - {{ multicluster_engine_managed_cluster_baremetal.service_network_cidr }}
-    userManagedNetworking: {{ multicluster_engine_managed_cluster_baremetal.user_managed_networking }}
-{% if multicluster_engine_managed_cluster_baremetal.clusterwide_proxy %}
+    - {{ multicluster_engine_managed_cluster.service_network_cidr }}
+    userManagedNetworking: {{ multicluster_engine_managed_cluster.user_managed_networking }}
+{% if multicluster_engine_managed_cluster.clusterwide_proxy %}
   proxy:
-    httpProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.http_proxy }}
-    httpsProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.https_proxy }}
-    noProxy: {{ multicluster_engine_managed_cluster_baremetal.clusterwide_proxy.no_proxy }}
+    httpProxy: {{ multicluster_engine_managed_cluster.clusterwide_proxy.http_proxy }}
+    httpsProxy: {{ multicluster_engine_managed_cluster.clusterwide_proxy.https_proxy }}
+    noProxy: {{ multicluster_engine_managed_cluster.clusterwide_proxy.no_proxy }}
 {% endif %}
-  sshPublicKey: '{{ multicluster_engine_managed_cluster_baremetal.ssh_authorized_key }}'
-
+  sshPublicKey: '{{ multicluster_engine_managed_cluster.ssh_authorized_key }}'
