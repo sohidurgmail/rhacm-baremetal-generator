@@ -6,7 +6,7 @@ This repo generates all required YAML manifests to create a **baremetal managed 
 
 `ansible-playbook generate-mce-yamls.yml` reads:
 
-- `nodes.csv` – one row per node (Worker nodes, Red Hat Core OS, iLO IP, MACs, etc.).
+- `nodes.csv` – one row per node (Worker nodes, RedHat Core OS, iLO IP, MACs, etc.).
 - `vars/cluster.yml` – cluster-level settings (name, base domain, VIPs, etc.).
 - `templates/*.j2` – Jinja2 templates for RHACM/MCE objects.
 

@@ -60,7 +60,7 @@
         csv_clean: >-
           {{
             (csv_raw.content | b64decode)
-            | regex_replace('(?s)^.*?(Worker nodes,Red Hat Core OS.*)$', '\1')
+            | regex_replace('(?s)^.*?(Worker nodes,RedHat Core OS.*)$', '\1')
           }}
 
     - name: Parse cleaned CSV into list of dicts (header-driven)
@@ -72,8 +72,8 @@
         nodes: >-
           {{
             nodes_raw
-            | selectattr('Red Hat Core OS', 'defined')
-            | selectattr('Red Hat Core OS', 'ne', '')
+            | selectattr('RedHat Core OS', 'defined')
+            | selectattr('RedHat Core OS', 'ne', '')
             | selectattr('state', 'defined')
             | selectattr('state', 'equalto', 'Active')
             | list
@@ -114,14 +114,14 @@
           {{
             (ansible_loop.index0 < 6)
             | ternary(output_dir, remaining_output_dir)
-          }}/baremetalhost-{{ item['Red Hat Core OS'] }}.yaml
+          }}/baremetalhost-{{ item['RedHat Core OS'] }}.yaml
         mode: '0664'
       loop: "{{ nodes }}"
       loop_control:
-        label: "{{ item['Red Hat Core OS'] }}"
+        label: "{{ item['RedHat Core OS'] }}"
         extended: true
       vars:
-        rhcos_name: "{{ item['Red Hat Core OS'] }}"
+        rhcos_name: "{{ item['RedHat Core OS'] }}"
         ilo_ip: "{{ item['iLO IP'] }}"
         ilo_mac: "{{ item['ILO MAC'] }}"
         # First 3 nodes are masters, everything else is worker (for labels in BMH)
@@ -134,16 +134,16 @@
           {{
             (ansible_loop.index0 < 6)
             | ternary(output_dir, remaining_output_dir)
-          }}/nmstateconfig-{{ item['Red Hat Core OS'] }}.yaml
+          }}/nmstateconfig-{{ item['RedHat Core OS'] }}.yaml
         mode: '0664'
       loop: "{{ nodes }}"
       loop_control:
-        label: "{{ item['Red Hat Core OS'] }}"
+        label: "{{ item['RedHat Core OS'] }}"
         extended: true
       vars:
-        rhcos_name: "{{ item['Red Hat Core OS'] }}"
+        rhcos_name: "{{ item['RedHat Core OS'] }}"
         mgmt_ip: "{{ item['Management IP'] }}"
-        bmc57416_nic0_mac: "{{ item['BMC57416 NIC0'] }}"
+        bmc57416_nic0_mac: "{{ item['BCM57416 NIC0'] }}"
         bmc57416_nic1_mac: "{{ item['BMC57416 NIC1'] }}"
-        sfc_x2522_nic0_mac: "{{ item['SFC X2522 NIC0'] }}"
-        sfc_x2522_nic1_mac: "{{ item['SFC X2522 NIC1'] }}"
+        sfc_x2522_nic0_mac: "{{ item['SFC X2522 NIC 0'] }}"
+        sfc_x2522_nic1_mac: "{{ item['SFC X2522 NIC 1'] }}"
