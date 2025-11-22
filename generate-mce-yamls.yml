@@ -67,13 +67,15 @@
       ansible.builtin.set_fact:
         nodes_raw: "{{ csv_clean | community.general.from_csv }}"
 
-    - name: Filter valid node rows (drop junk/blank/notes)
+    - name: Filter valid node rows (only Active nodes, drop junk/blank/notes)
       ansible.builtin.set_fact:
         nodes: >-
           {{
             nodes_raw
             | selectattr('Red Hat Core OS', 'defined')
             | selectattr('Red Hat Core OS', 'ne', '')
+            | selectattr('state', 'defined')
+            | selectattr('state', 'equalto', 'Active')
             | list
           }}
   tasks:
