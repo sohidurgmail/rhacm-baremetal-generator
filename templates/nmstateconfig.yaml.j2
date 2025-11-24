@@ -28,7 +28,7 @@ spec:
         - destination: 0.0.0.0/0
           next-hop-address: {{ multicluster_engine_managed_cluster.nmstate_gateway }}
           next-hop-interface: bond0
-          table-id: 254
+          table-id: {{ multicluster_engine_managed_cluster_baremetal.nmstate_table_id | default(254) }}
     interfaces:
       - name: ens1f0np0
         type: ethernet

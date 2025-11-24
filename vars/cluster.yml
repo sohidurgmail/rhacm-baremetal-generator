@@ -98,3 +98,4 @@ multicluster_engine_managed_cluster_baremetal:
 
   # Prefix length for Management IP (e.g. /24)
   nmstate_prefix: 24
+  nmstate_table_id: 254
