@@ -1,0 +1,31 @@
+{% for item in cudn_items %}
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: NetworkMap
+metadata:
+  # One NetworkMap per VLAN / CUDN
+  name: {{ item.name }}-map
+  namespace: {{ networkmap_provider_namespace }}
+spec:
+  map:
+    - destination:
+        # Multus network coming from your ClusterUserDefinedNetwork
+        name: {{ item.name }}
+        namespace: {{ networkmap_destination_namespace }}
+        type: multus
+      source:
+        # vSphere network name from CSV "Name" column
+        name: {{ item.source_name }}
+  provider:
+    destination:
+      apiVersion: forklift.konveyor.io/v1beta1
+      kind: Provider
+      name: {{ networkmap_destination_provider_name }}
+      namespace: {{ networkmap_provider_namespace }}
+    source:
+      apiVersion: forklift.konveyor.io/v1beta1
+      kind: Provider
+      name: {{ networkmap_source_provider_name }}
+      namespace: {{ networkmap_provider_namespace }}
+{% endfor %}
+...

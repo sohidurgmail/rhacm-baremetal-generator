@@ -1,0 +1,23 @@
+---
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: {{ item.name }}
+spec:
+  namespaceSelector:
+    matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+          - default
+  network:
+    topology: Localnet
+    localnet:
+      role: Secondary
+      physicalNetworkName: {{ physical_network_name }}
+      vlan:
+        mode: {{ vlan_mode }}
+        access:
+          id: {{ item.vlan_id | int }}
+      ipam:
+        mode: Disabled

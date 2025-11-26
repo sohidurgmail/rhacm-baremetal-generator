@@ -1,0 +1,56 @@
+- name: Generate NetworkMap yamls
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/cudn.yml   # reuse same CSV path and add NetworkMap vars below
+
+  tasks:
+    - name: Ensure CUDN output directory exists
+      ansible.builtin.file:
+        path: "{{ cudn_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Read CUDN entries from CSV
+      community.general.read_csv:
+        path: "{{ cudn_csv_path }}"
+      register: cudn_src
+
+    - name: Build CUDN items (normalized name + source_name + vlan_id)
+      ansible.builtin.set_fact:
+        cudn_items: >-
+          {{ (cudn_items | default([])) + [ {
+              'name': (
+                item['Name']
+                | lower
+                | regex_replace('[^0-9a-zA-Z]+', '-')
+                | regex_replace('^-+', '')
+                | regex_replace('-+$', '')
+              ),
+              'source_name': item['Name'],
+              'vlan_id': (
+                item['VLAN ID']
+                | default('')
+                | regex_search('([0-9]+)')
+                | default('0', true)
+                | int
+              )
+          } ] }}
+      loop: "{{ cudn_src.list }}"
+      when:
+        - item['Name'] is defined
+        - item['Name'] | trim != ''
+        - item['VLAN ID'] is defined
+        - item['VLAN ID'] | trim != ''
+
+    - name: Fail if no valid CUDN rows were found
+      ansible.builtin.fail:
+        msg: "No valid rows (Name + VLAN ID) found in {{ cudn_csv_path }}"
+      when: cudn_items | default([]) | length == 0
+
+    - name: Render single NetworkMap YAML with all mappings
+      ansible.builtin.template:
+        src: templates/networkmap-all.yaml.j2
+        dest: "{{ cudn_output_dir }}/networkmap-all.yaml"
+        mode: '0644'

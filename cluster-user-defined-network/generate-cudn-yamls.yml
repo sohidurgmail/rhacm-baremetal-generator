@@ -1,0 +1,61 @@
+---
+- name: Generate ClusterUserDefinedNetwork yamls
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/cudn.yml
+
+  tasks:
+    - name: Ensure output directory exists
+      ansible.builtin.file:
+        path: "{{ cudn_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Read CUDN entries from CSV
+      community.general.read_csv:
+        path: "{{ cudn_csv_path }}"
+      register: cudn_csv
+
+    - name: Build CUDN items (normalized name + vlan_id)
+      ansible.builtin.set_fact:
+        cudn_items: "{{ (cudn_items | default([])) + [ { 'name': normalized_name, 'vlan_id': vlan_id } ] }}"
+      vars:
+        # Normalize name: lowercase, replace non-alnum with '-', trim leading/trailing '-'
+        normalized_name: >-
+          {{ item['Name']
+             | lower
+             | regex_replace('[^0-9a-zA-Z]+', '-')
+             | regex_replace('^-+', '')
+             | regex_replace('-+$', '')
+          }}
+        # Extract digits from "VLAN access: 80" -> 80
+        vlan_id: >-
+          {{ (item['VLAN ID']
+              | default('')
+              | regex_search('([0-9]+)')
+              | default('0', true)
+             ) | int }}
+      loop: "{{ cudn_csv.list }}"
+      when:
+        - (item['Name'] | default('') | trim) != ''
+        - (item['VLAN ID'] | default('') | trim) != ''
+
+    - name: Fail if no valid CUDN rows were found
+      ansible.builtin.fail:
+        msg: "No valid CUDN rows found in {{ cudn_csv_path }} (Name and VLAN ID required)."
+      when: cudn_items is not defined or cudn_items | length == 0
+
+    # - name: Render ClusterUserDefinedNetwork manifests (one file per CUDN)
+    #   ansible.builtin.template:
+    #     src: templates/clusteruserdefinednetwork.yaml.j2
+    #     dest: "{{ cudn_output_dir }}/{{ item.name }}.yaml"
+    #     mode: '0644'
+    #   loop: "{{ cudn_items }}"
+
+    - name: Render combined CUDN manifest (all CUDNs in one file)
+      ansible.builtin.template:
+        src: templates/clusteruserdefinednetwork-all.yaml.j2
+        dest: "{{ cudn_output_dir }}/cudn-all.yaml"
+        mode: '0644'

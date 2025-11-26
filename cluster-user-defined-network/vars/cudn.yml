@@ -1,0 +1,14 @@
+# vars/cudn.yml
+
+# Existing:
+cudn_csv_path: cudn.csv
+cudn_output_dir: cudn-config
+physical_network_name: localnet-bridge-trunk
+vlan_mode: Access
+
+# New: NetworkMap-related settings
+networkmap_provider_namespace: openshift-mtv
+networkmap_destination_namespace: default       # Multus/NAD namespace
+networkmap_destination_provider_name: host       # destination Provider CR name
+networkmap_source_provider_name: vcenter-dc3     # source Provider CR name
+#source_id: dvportgroup-106
