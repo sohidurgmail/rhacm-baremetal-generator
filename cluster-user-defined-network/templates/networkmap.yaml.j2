@@ -1,0 +1,31 @@
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: NetworkMap
+metadata:
+  # One NetworkMap per VLAN / CUDN
+  name: {{ item.name }}-map
+  namespace: {{ networkmap_provider_namespace }}
+spec:
+  map:
+{% for ns in networkmap_destination_namespaces %}
+    - destination:
+        # Multus network coming from your CUDN
+        name: {{ item.name }}
+        namespace: {{ ns }}
+        type: multus
+      source:
+        # You can tune this; here we just use VLAN ID + original name
+        id: "{{ item.vlan_id }}"
+        name: "{{ item.source_name }}"
+{% endfor %}
+  provider:
+    destination:
+      apiVersion: forklift.konveyor.io/v1beta1
+      kind: Provider
+      name: {{ networkmap_destination_provider_name }}
+      namespace: {{ networkmap_provider_namespace }}
+    source:
+      apiVersion: forklift.konveyor.io/v1beta1
+      kind: Provider
+      name: {{ networkmap_source_provider_name }}
+      namespace: {{ networkmap_provider_namespace }}

@@ -3,21 +3,21 @@
   gather_facts: false
 
   vars_files:
-    - vars/cudn.yml   # reuse same CSV path and add NetworkMap vars below
+    - vars/cudn.yml   # reuse same CSV + add networkmap_* vars here
 
   tasks:
-    - name: Ensure CUDN output directory exists
+    - name: Ensure NetworkMap output directory exists
       ansible.builtin.file:
-        path: "{{ cudn_output_dir }}"
+        path: "{{ networkmap_output_dir }}"
         state: directory
         mode: '0755'
 
-    - name: Read CUDN entries from CSV
+    - name: Read CUDN / network entries from CSV
       community.general.read_csv:
         path: "{{ cudn_csv_path }}"
-      register: cudn_src
+      register: cudn_csv
 
-    - name: Build CUDN items (normalized name + source_name + vlan_id)
+    - name: Build items for NetworkMap (reuse CUDN naming + VLAN)
       ansible.builtin.set_fact:
         cudn_items: >-
           {{ (cudn_items | default([])) + [ {
@@ -28,29 +28,29 @@
                 | regex_replace('^-+', '')
                 | regex_replace('-+$', '')
               ),
-              'source_name': item['Name'],
               'vlan_id': (
                 item['VLAN ID']
                 | default('')
                 | regex_search('([0-9]+)')
                 | default('0', true)
                 | int
-              )
-          } ] }}
-      loop: "{{ cudn_src.list }}"
-      when:
-        - item['Name'] is defined
-        - item['Name'] | trim != ''
-        - item['VLAN ID'] is defined
-        - item['VLAN ID'] | trim != ''
+              ),
+              'source_name': item['Name']
+            } ] }}
+      loop: "{{ cudn_csv.list }}"
+      loop_control:
+        label: "{{ item['Name'] | default('UNKNOWN') }}"
 
-    - name: Fail if no valid CUDN rows were found
+    - name: Fail if no valid NetworkMap rows were found
       ansible.builtin.fail:
-        msg: "No valid rows (Name + VLAN ID) found in {{ cudn_csv_path }}"
+        msg: "No valid rows were found in {{ cudn_csv_path }} to build NetworkMaps"
       when: cudn_items | default([]) | length == 0
 
-    - name: Render single NetworkMap YAML with all mappings
+    - name: Render one NetworkMap manifest per VLAN
       ansible.builtin.template:
-        src: templates/networkmap-all.yaml.j2
-        dest: "{{ cudn_output_dir }}/networkmap-all.yaml"
+        src: templates/networkmap.yaml.j2
+        dest: "{{ networkmap_output_dir }}/{{ item.name }}-map.yaml"
         mode: '0644'
+      loop: "{{ cudn_items }}"
+      loop_control:
+        label: "{{ item.name }}-map"

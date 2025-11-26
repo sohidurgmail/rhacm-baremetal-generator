@@ -1,14 +1,25 @@
 # vars/cudn.yml
 
-# Existing:
+# CUDN generation
 cudn_csv_path: cudn.csv
 cudn_output_dir: cudn-config
+
+# NetworkMap generation
+networkmap_output_dir: nm-config   # or a different dir if you prefer
+
+# CUDN settings
 physical_network_name: localnet-bridge-trunk
 vlan_mode: Access
 
-# New: NetworkMap-related settings
+# NetworkMap / MTV settings
 networkmap_provider_namespace: openshift-mtv
-networkmap_destination_namespace: default       # Multus/NAD namespace
+
+# One or more namespaces where the Multus (CUDN) network will be used
+networkmap_destination_namespaces:
+  - default
+  # - project2
+  # - project3
+
 networkmap_destination_provider_name: host       # destination Provider CR name
 networkmap_source_provider_name: vcenter-dc3     # source Provider CR name
-#source_id: dvportgroup-106
+#source_id: dvportgroup-106   # optional if you ever want to set it
